@@ -1,0 +1,55 @@
+from Datapre import *#将DataPre.py文件里面导入的模块和实现的方法，导入过来
+from sklearn.feature_extraction.text import TfidfVectorizer#TFIDF的处理模块
+
+#输出的文件路径
+word_level_tfidf_content = 'C:/Users/Administrator/Desktop/word_level/content.tfidf.dat'
+
+#读取的文件（反序列化）
+def _read_bunch(filename):
+    with open(filename,'rb') as f:
+        bunch = pickle.load(f)
+    return bunch
+
+#写入文件（序列化）
+def _write_bunch(filename,bunch):
+    with open(filename,'wb') as f:
+        pickle.dump(bunch,f)
+
+#获取停用词
+def get_stop_words(filename='data/中文停用词库.txt'):
+    stop_word = []
+    with open(filename,'r',encoding='gbk') as f:
+        lines = f.readlines()
+    for line in lines:
+        stop_word.append(line.strip())
+    return stop_word
+
+#对文章的内容进行量化
+def get_tfidf(inputfile,outputfile):
+    '''
+    将文章的内容进行TFIDF量化处理
+    :param inputfile: 输入文件，文件里面有文章内容和文章的类别
+    :param outputfile: 输出文件，文件里面主要有经过TFIDF量化后的矩阵
+    :return:
+    '''
+    bunch = _read_bunch(inputfile)#读取文件，该文件是由DataPre.py处理获得
+    # 实例化Bunch，labels：是列表，每篇文章对应的类别；
+    # category_label：字典，key为中文标签，value为数字标签
+    # tfidf：列表，讲过tfidf处理后的数据矩阵
+    # vocabulary：字典，每个变量对应的含义（词汇）
+    tfidf_bunch = Bunch(labels=[],category_label={},tfidf = [],vocabulary={})
+    #labels（文章类别列表）和category_label（类别对照字典）通过bunch里面对应的变量直接赋值
+    tfidf_bunch.labels = bunch.labels
+    tfidf_bunch.category_label = bunch.category_label
+    #实例化TFIDF模型
+    #sublinear_tf：是否将词频转化为1+log(tf)
+    #stop_words:停用词
+    #max_df:文档频率不能高于多少
+    TFIDF1 = TfidfVectorizer(sublinear_tf=True,stop_words=get_stop_words(),max_df=0.6)
+    tfidf_bunch.tfidf=TFIDF1.fit_transform(bunch.contents)#训练tfidf,并且返回tfidf矩阵
+    tfidf_bunch.vocabulary = TFIDF1.vocabulary_#每个变量对应的词汇表
+
+    _write_bunch(outputfile,tfidf_bunch)#保存
+
+if __name__ == '__main__':
+    get_tfidf(word_level_content,word_level_tfidf_content)#对文章的内容进行量化
