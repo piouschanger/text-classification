@@ -1,0 +1,57 @@
+import jieba
+import os
+import pickle
+from sklearn.datasets.base import Bunch
+
+#输入文件路径
+cnews_category = 'C:/Users/Administrator/Desktop/circle_channel.txt'
+cnews_train = 'C:/Users/Administrator/Desktop/out_circle_content.txt'
+
+
+#保存的文件路径
+word_level = 'C:/Users/Administrator/Desktop/word_level'
+word_level_content = 'C:/Users/Administrator/Desktop/word_level/content.dat'
+
+if not os.path.exists(word_level):
+    os.mkdir(word_level)
+
+class Category():
+    def __init__(self,filename):
+        self.category_label = {}
+        for line in open(filename, 'r', encoding = 'utf-8'):
+            category, label = line.strip().split(':')
+            self.category_label[category] = label
+
+    def category_to_label(self,category):
+        return self.category_label[category]
+
+    def num_category(self):
+        return int(len(self.category_label))
+
+def generate_word(inputfile,outfile):
+    categories = Category(cnews_category)
+    bunch = Bunch(labels=[], contents=[], category_label={})
+    bunch.category_label = categories.category_label
+    with open(inputfile, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        print(lines)
+    for line in lines:
+        try:
+            category,content = line.strip().split('\t')
+            bunch.labels.append(categories.category_to_label(category))
+            print(category)
+            words = jieba.cut(content)
+            cc = ''
+            for word in words:
+                word = word.strip()
+                if word !='':
+                    cc += word+' '
+            bunch.contents.append(cc.strip())
+        except:
+            pass
+        continue
+    with open(outfile, 'wb') as fout:
+        pickle.dump(bunch, fout)
+
+if __name__=='__main__':
+    generate_word(cnews_train, word_level_content)
