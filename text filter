@@ -1,0 +1,30 @@
+import re
+# import英文字符
+from string import ascii_letters
+#from string import punctuation
+from string import digits
+# 如果是汉字，就用  from zhon.hanzi import punctuation
+import codecs
+# String模块中的常量：
+# string.digits：数字0~9
+# string.letters：所有字母（大小写）
+# string.lowercase：所有小写字母
+# string.printable：可打印字符的字符串
+# string.punctuation：所有标点
+# string.uppercase：所有大写字母
+
+# add_punc补充一些punctuation中没有的标点
+add_punc = './ <>_ - - = + "‘’@#￥% … &×（）——【】{};；● &～|\r \000:'
+punc =add_punc + ascii_letters + digits
+print(punc)
+
+fr = codecs.open('C:/Users/Administrator/Desktop/circle_content.txt', encoding='utf-8')
+fw = codecs.open('C:/Users/Administrator/Desktop/out_circle_content.txt', 'w', encoding='utf-8')
+
+# 利用正则表达式替换为一个空格
+for line in fr:
+    line = re.sub(r"[{}]+".format(punc),"",line)
+    fw.write(line+'')
+
+fr.close()
+fw.close()
