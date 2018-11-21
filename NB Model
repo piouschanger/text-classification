@@ -1,0 +1,21 @@
+from sklearn.naive_bayes import MultinomialNB#多项式朴素贝叶斯
+from sklearn.metrics import classification_report#
+from TFIDF import _read_bunch
+from TFIDF import *
+from sklearn.model_selection import train_test_split
+#预处理
+def pre_deal(filename):
+    tfidf_bunch = _read_bunch(filename)#读取包含关于tfidf量化的矩阵和类别标签
+    X = tfidf_bunch.tfidf#X,自变量
+    y = tfidf_bunch.labels#Y,应变量
+    # 拆分数据集
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+    return X_train, X_test, y_train, y_test
+
+if __name__ == '__main__':
+    X_train, X_test, y_train, y_test = pre_deal(word_level_tfidf_content)#预处理，返回拆分好的数据集
+    nb = MultinomialNB(alpha=0.01)#声明朴素贝叶斯模型
+    nb.fit(X_train,y_train)#训练模型
+    y_pred = nb.predict(X_test)#预测
+
+    print(classification_report(y_test,y_pred))#输出评判结果
