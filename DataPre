@@ -34,7 +34,6 @@ def generate_word(inputfile,outfile):
     bunch.category_label = categories.category_label
     with open(inputfile, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-        print(lines)
     for line in lines:
         try:
             category,content = line.strip().split('\t')
