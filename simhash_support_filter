@@ -1,0 +1,38 @@
+import re
+# import英文字符
+from string import ascii_letters
+#from string import punctuation
+from string import digits
+# 如果是汉字，就用  from zhon.hanzi import punctuation
+import codecs
+# String模块中的常量：
+# string.digits：数字0~9
+# string.letters：所有字母（大小写）
+# string.lowercase：所有小写字母
+# string.printable：可打印字符的字符串
+# string.punctuation：所有标点
+# string.uppercase：所有大写字母
+
+# add_punc补充一些punctuation中没有的标点
+add_punc = './ <>_ - - = ", 。，？！“”：‘’@#￥% … &×（）——+【】{};；● &～|\s:'
+punc =add_punc
+print(punc)
+
+fr1 = codecs.open('C:/Users/Administrator/Desktop/exp.txt', encoding='gbk')
+fr2 = codecs.open('C:/Users/Administrator/Desktop/test.txt', encoding='gbk')
+fw1 = codecs.open('C:/Users/Administrator/Desktop/newexp.txt', 'w', encoding='gbk')
+fw2 = codecs.open('C:/Users/Administrator/Desktop/newtest.txt', 'w', encoding='gbk')
+
+# 利用正则表达式替换为一个空格
+for line in fr1:
+    line = re.sub(r"[{}]+".format(punc),"",line)
+    fw1.write(line+'')
+
+for line in fr2:
+    line = re.sub(r"[{}]+".format(punc),"",line)
+    fw2.write(line+'')
+
+fr1.close()
+fw1.close()
+fr2.close()
+fw2.close()
