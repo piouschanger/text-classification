@@ -3,37 +3,9 @@ import codecs
 import jieba
 import jieba.analyse
 import numpy as np
-import string
 
-stoplist = {}.fromkeys([ line.rstrip() for line in codecs.open(r"C:/Users/Administrator/Desktop/word_level/data/中文停用词库.txt",'r','gbk') ])
 fr1 = 'C:/Users/Administrator/Desktop/exp.txt'
 fr2 = 'C:/Users/Administrator/Desktop/test.txt'
-add_punc = './ <>_ - - = ", 。，？！“”：‘’@#￥% … &×（）——+【】{};；● &～| \s:'
-punc = add_punc
-
-with open(fr1, encoding='gbk') as f:
-    list1 = f.read()
-    string = ''
-    X, Y = ['\u4e00', '\u9fa5']
-    text1 = re.sub(r'[^\w]+', '', list1)
-    # print(text1)
-    s = jieba.cut(text1)
-    s = [i for i in s if len(i) > 1 and X <= i <= Y]
-    string = string.join(s)
-    line1 = re.sub(r"[{}]+".format(punc), "", string)
-
-
-
-with open(fr2, encoding='gbk') as f:
-    list2 = f.read()
-    string = ''
-    X, Y = ['\u4e00', '\u9fa5']
-    text2 = re.sub(r'[^\w]+', '', list2)
-    # print(text2)
-    s = jieba.cut(text2)
-    s = [i for i in s if len(i) > 1 and X <= i <= Y]
-    string = string.join(s)
-    line2 = re.sub(r"[{}]+".format(punc), "", string)
 
 class simhash:
     def __init__(self,content):
@@ -107,13 +79,41 @@ class simhash:
         return i
 
 
+def get_line(fr1,fr2):
+    punc = './ <>_ - - = ", 。，？！“”：‘’@#￥% … &×（）——+【】{};；● &～| \s:'
+    stoplist = {}.fromkeys([line.rstrip() for line in
+                           codecs.open(r"C:/Users/Administrator/Desktop/word_level/data/中文停用词库.txt", 'r', 'gbk')])
+    with open(fr1, encoding='gbk') as f:
+        list1 = f.read()
+        string = ''
+        X, Y = ['\u4e00', '\u9fa5']
+        text1 = re.sub(r'[^\w]+', '', list1)
+        # print(text1)
+        s = jieba.cut(text1)
+        s = [i for i in s if len(i) > 1 and X <= i <= Y and i not in stoplist]
+        string = string.join(s)
+        line1 = re.sub(r"[{}]+".format(punc), "", string)
+
+    with open(fr2, encoding='gbk') as f:
+        list2 = f.read()
+        string = ''
+        X, Y = ['\u4e00', '\u9fa5']
+        text2 = re.sub(r'[^\w]+', '', list2)
+        # print(text2)
+        s = jieba.cut(text2)
+        s = [i for i in s if len(i) > 1 and X <= i <= Y and i not in stoplist]
+        string = string.join(s)
+        line2 = re.sub(r"[{}]+".format(punc), "", string)
+        hash1 = simhash(line1.split())
+        hash2 = simhash(line2.split())
+        print(hash1.hammingDis(hash2))
+        if hash1.hammingDis(hash2) <= 18:
+            print('文本相似')
+        else:
+            print('文本不相似')
+        print(line1)
+        print(line2)
+
+
 if __name__ == '__main__':
-    hash1 = simhash(line1.split())
-    hash2 = simhash(line2.split())
-    print(hash1.hammingDis(hash2))
-    if hash1.hammingDis(hash2) <= 18:
-        print('文本相似')
-    else:
-        print('文本不相似')
-    print(line1)
-    print(line2)
+    get_line(fr1, fr2)
