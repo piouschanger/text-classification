@@ -1,0 +1,82 @@
+# -*- coding: UTF-8 -*
+import jieba.posseg as pseg
+import codecs
+from gensim import corpora, models, similarities
+from urllib import request
+import urllib
+from bs4 import BeautifulSoup
+
+
+stop_words = 'C:/Users/Administrator/Desktop/word_level/data/中文停用词库.txt'
+stopwords = codecs.open(stop_words, 'rb').readlines()
+stopwords = [w.strip() for w in stopwords]
+
+stop_flag = ['x', 'c', 'u','d', 'p', 't', 'uj', 'm', 'f', 'r']
+
+def tokenization(filename):
+    result = []
+    with open(filename, 'rb') as f:
+        text = f.read()
+        words = pseg.cut(text)
+    for word, flag in words:
+        if flag not in stop_flag and word not in stopwords:
+            result.append(word)
+    return result
+
+#爬取文件
+url = 'http://circle.api.idianyou.cn/circle_api/circle/toNewsDetail.do?circleContentId=26546545'
+response = urllib.request.urlopen(url)
+page1 = response.read().decode('utf-8')
+soup = BeautifulSoup(page1)
+exp = soup.find('div', class_="content")
+with open('C:/Users/Administrator/Desktop/exp.txt', 'w', encoding='utf-8') as f:
+    f.write(exp.text)
+#print(text)
+
+ur2 = 'http://circle.api.idianyou.cn/circle_api/circle/toNewsDetail.do?circleContentId=26611503'
+response = urllib.request.urlopen(ur2)
+page2 = response.read().decode('utf-8')
+soup = BeautifulSoup(page2)
+test = soup.find('div', class_="content")
+with open('C:/Users/Administrator/Desktop/test.txt', 'w', encoding='utf-8') as f:
+    f.write(test.text)
+#print(text)
+
+
+filenames = ['C:/Users/Administrator/Desktop/exp.txt',
+             'C:/Users/Administrator/Desktop/taosui1.txt',
+             'C:/Users/Administrator/Desktop/taosui2.txt',
+             'C:/Users/Administrator/Desktop/taosui3.txt',
+             'C:/Users/Administrator/Desktop/taosui4.txt',
+             'C:/Users/Administrator/Desktop/mengfei.txt'
+            ]
+corpus = []
+for each in filenames:
+    corpus.append(tokenization(each))
+#print(len(corpus))
+
+dictionary = corpora.Dictionary(corpus)
+#print(dictionary)
+
+doc_vectors = [dictionary.doc2bow(text) for text in corpus]
+#print(len(doc_vectors))
+#print(doc_vectors)
+
+tfidf = models.TfidfModel(doc_vectors)
+tfidf_vectors = tfidf[doc_vectors]
+
+lsi = models.LsiModel(tfidf_vectors, id2word=dictionary, num_topics=5)
+lsi_vector = lsi[tfidf_vectors]
+#for vec in lsi_vector:
+#    print(vec)
+
+query = tokenization('C:/Users/Administrator/Desktop/test.txt')
+query_bow = dictionary.doc2bow(query)
+#print(query_bow)
+
+query_lsi = lsi[query_bow]
+#print(query_lsi)
+
+index = similarities.MatrixSimilarity(lsi_vector)
+sims = index[query_lsi]
+print(list(enumerate(sims)))
